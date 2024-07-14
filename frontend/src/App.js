@@ -7,23 +7,31 @@ import TestCaseDetail from './pages/TestCaseDetail';
 import Login from './pages/Login';
 import LogoutModal from './components/LogoutModal';
 import ModelTrainingComponent from './components/ModelTrainingComponent';
+import ResultAnalysis from './pages/ResultAnalysis';
 import './App.css';
+import { FaSpinner  } from 'react-icons/fa';
 
 const App = () => {
   const [reports, setReports] = useState([]);
   const [authenticated, setAuthenticated] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loggedOut, setLoggedOut] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+	setIsLoading(true);
     fetch('http://localhost:5000/api/reports')
       .then(response => response.json())
-      .then(data => setReports(data))
+      .then(data => {
+		  setReports(data);
+		  setIsLoading(false);
+	  })
       .catch(error => console.error('Error fetching reports:', error));
   }, []);
 
   const handleLogout = () => {
     setShowLogoutModal(true);
+	localStorage.clear();
   };
 
   const handleConfirmLogout = () => {
@@ -58,13 +66,14 @@ const App = () => {
             </div>
           ) : (
             <Routes>
-              <Route path="/login" element={<Login setAuthenticated={handleLogin} />} />
+              <Route path="/login" element={isLoading?<FaSpinner/>:<Login setAuthenticated={handleLogin} />} />
               {authenticated ? (
                 <>
                   <Route path="/" element={<ExecutionTable reports={reports} />} />
                   <Route path="/execution/:name" element={<ExecutionDetail reports={reports} />} />
                   <Route path="/testcase/:featureIndex/:testCaseIndex" element={<TestCaseDetail reports={reports} />} />
                   <Route path="/model-training" element={<ModelTrainingComponent />} />
+				  <Route path="/result-analysis" element={<ResultAnalysis />} target="_blank" rel="noopener noreferrer" />
                 </>
               ) : (
                 <Route path="*" element={<Navigate to="/login" />} />

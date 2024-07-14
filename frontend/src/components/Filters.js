@@ -36,13 +36,6 @@ const Filters = ({ filters, onChange }) => {
                 onChange={handleInputChange}
                 disabled
             />
-            <input
-                type="text"
-                name="search"
-                placeholder="Search..."
-                value={filters.search}
-                onChange={handleInputChange}
-            />
         </div>
     );
 };

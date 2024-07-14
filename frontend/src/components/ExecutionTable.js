@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Pagination from './Pagination';
 import Filters from './Filters';
 import './ExecutionTable.css';
-import { FaFilter, FaSort } from 'react-icons/fa';
+import { FaFilter, FaSort  } from 'react-icons/fa';
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';

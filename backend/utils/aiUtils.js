@@ -188,7 +188,7 @@ const generateFeedback = (commonError, commonXPathFailure, commonStepFailure, co
     }
 
     // Use nlp (compromise) to process feedback
-    feedback = nlp(feedback).sentences().toText();
+    feedback = nlp(feedback).out('text');
 
     return feedback;
 };

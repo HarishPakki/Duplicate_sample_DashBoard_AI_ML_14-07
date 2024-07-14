@@ -1,0 +1,33 @@
+.result-analysis-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-analysis-container h2 {
+    margin-bottom: 20px;
+}
+
+.result-analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.result-analysis-table th, .result-analysis-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.result-analysis-table th {
+    background-color: #f2f2f2;
+}
+
+.result-analysis-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.result-analysis-table tr:hover {
+    background-color: #f1f1f1;
+}

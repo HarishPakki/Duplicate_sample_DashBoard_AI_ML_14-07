@@ -9,11 +9,18 @@ const Login = ({ setAuthenticated }) => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+	React.useEffect(()=>{
+		if(localStorage.getItem('user')){
+			setAuthenticated(true);
+            navigate('/');
+		}
+	},[])
     const handleSubmit = (e) => {
         e.preventDefault();
         if (username === 'admin' && password === 'admin') {
             setAuthenticated(true);
             navigate('/');
+			localStorage.setItem('user',username);
         } else {
             setError('Invalid credentials');
         }
