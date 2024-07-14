@@ -1,0 +1,203 @@
+[
+  {
+    "line": 2,
+    "elements": [
+      {
+        "start_timestamp": "2024-07-4T12:28:57.245Z",
+        "before": [
+          {
+            "result": {
+              "duration": 15000000,
+              "status": "skipped"
+            },
+            "match": {
+              "location": "org.ocbcqa.core.base.test.CucumberGlue.beforeScenario(io.cucumber.java.Scenario)"
+            }
+          },
+          {
+            "result": {
+              "duration": 32000000,
+              "status": "passed"
+            },
+            "match": {
+              "location": "stepdefinitions.selfdiagnostic.jira.JiraSteps.beforeScenario(io.cucumber.java.Scenario)"
+            }
+          }
+        ],
+        "line": 13,
+        "name": "Negative review of JIRA launch page",
+        "description": "",
+        "id": "web-application;negative-review-of-jira-launch-page",
+        "after": [
+          {
+            "result": {
+              "duration": 1000000,
+              "status": "skipped"
+            },
+            "match": {
+              "location": "org.ocbcqa.core.base.test.CucumberGlue.afterScenario(io.cucumber.java.Scenario)"
+            }
+          }
+        ],
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "output": [
+              "Launched JIRA Browser"
+            ],
+            "result": {
+              "duration": 2277000000,
+              "status": "passed"
+            },
+            "line": 14,
+            "name": "User launch JIRA",
+            "match": {
+              "location": "stepdefinitions.selfdiagnostic.jira.JiraSteps.launchJIRA()"
+            },
+            "keyword": "Given "
+          },
+          {
+            "result": {
+              "error_message": "Random error message for testing",
+              "duration": 5880000000,
+              "status": "failed"
+            },
+            "line": 15,
+            "name": "Login text should be same as expected",
+            "match": {
+              "location": "stepdefinitions.selfdiagnostic.jira.JiraSteps.verifyLoginText()"
+            },
+            "keyword": "Then "
+          },
+          {
+            "result": {
+              "duration": 1000000,
+              "status": "failed",
+              "error_message": "Random error message for testing"
+            },
+            "line": 16,
+            "name": "JIRA label should not be displayed",
+            "match": {
+              "location": "stepdefinitions.selfdiagnostic.jira.JiraHomeSteps.labelNotDisplayed()"
+            },
+            "keyword": "And "
+          },
+          {
+            "result": {
+              "status": "failed",
+              "error_message": "Random error message for testing"
+            },
+            "line": 17,
+            "name": "Close JIRA application",
+            "match": {
+              "location": "stepdefinitions.selfdiagnostic.jira.JiraSteps.closeJIRA()"
+            },
+            "keyword": "And "
+          },
+          {
+            "result": {
+              "status": "failed",
+              "duration": 3305247
+            },
+            "line": 13,
+            "name": "Random Step 81",
+            "match": {
+              "location": "stepdefinitions.random.RandomSteps.randomStep9()"
+            },
+            "keyword": "When "
+          },
+          {
+            "result": {
+              "status": "skipped",
+              "duration": 4979290
+            },
+            "line": 20,
+            "name": "Random Step 98",
+            "match": {
+              "location": "stepdefinitions.random.RandomSteps.randomStep64()"
+            },
+            "keyword": "And "
+          },
+          {
+            "result": {
+              "status": "failed",
+              "duration": 2421734
+            },
+            "line": 14,
+            "name": "Random Step 68",
+            "match": {
+              "location": "stepdefinitions.random.RandomSteps.randomStep10()"
+            },
+            "keyword": "Then "
+          }
+        ],
+        "tags": [
+          {
+            "name": "@jira"
+          },
+          {
+            "name": "@web"
+          },
+          {
+            "name": "@Report"
+          },
+          {
+            "name": "@healthcheck"
+          },
+          {
+            "name": "@Smoke"
+          },
+          {
+            "name": "@AAUT-29"
+          },
+          {
+            "name": "@Fail"
+          },
+          {
+            "name": "@AAUT-12"
+          }
+        ]
+      }
+    ],
+    "name": "web application",
+    "description": "",
+    "id": "web-application",
+    "keyword": "Feature",
+    "uri": "file:src/test/features/selfdiagnostic/web/@1%20jira.feature",
+    "tags": [
+      {
+        "name": "@jira",
+        "type": "Tag",
+        "location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      {
+        "name": "@web",
+        "type": "Tag",
+        "location": {
+          "line": 1,
+          "column": 7
+        }
+      },
+      {
+        "name": "@Report",
+        "type": "Tag",
+        "location": {
+          "line": 1,
+          "column": 12
+        }
+      },
+      {
+        "name": "@healthcheck",
+        "type": "Tag",
+        "location": {
+          "line": 1,
+          "column": 20
+        }
+      }
+    ]
+  }
+]

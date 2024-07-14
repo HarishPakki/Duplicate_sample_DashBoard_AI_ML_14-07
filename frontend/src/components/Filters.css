@@ -1,0 +1,31 @@
+/* src/components/Filters.css */
+
+.filters-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.filters-container select,
+.filters-container input[type="text"],
+.filters-container input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    background-color: white;
+}
+
+.filters-container input[type="text"] {
+    flex-grow: 1;
+}
+
+.filters-container select {
+    width: auto;
+}
+
+.filters-container input[type="date"] {
+    background-color: #f4f4f9;
+    cursor: not-allowed;
+}

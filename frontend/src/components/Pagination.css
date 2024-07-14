@@ -1,0 +1,39 @@
+/* src/components/Pagination.css */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.page-item {
+    list-style: none;
+}
+
+.page-link {
+    padding: 8px 12px;
+    margin: 5px; /* Adjusted margin for better spacing */
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    text-decoration: none;
+}
+
+.page-link:hover {
+    background-color: #45a049;
+}
+
+.page-link[disabled] {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.page-item.active .page-link {
+    background-color: #45a049;
+    font-weight: bold;
+}
