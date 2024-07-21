@@ -18,7 +18,8 @@ ChartJS.register(
 );
 
 const ExecutionDetail = ({ reports }) => {
-  const { name } = useParams();
+  const { reportIndex, name } = useParams();
+  console.log("ExecutionDetail",reportIndex);
   const report = reports.find(r => r.name === name);
   const [prediction, setPrediction] = useState(null);
 
@@ -113,7 +114,7 @@ const ExecutionDetail = ({ reports }) => {
               {(report.data[0].elements || []).map((testCase, testCaseIndex) => (
                 <tr key={`${testCaseIndex}`}>
                   <td>
-                    <Link to={`/testcase/0/${testCaseIndex}`}>
+                    <Link to={`/testcase/${reportIndex}/${testCaseIndex}`}>
                       {testCase.name}
                     </Link>
                   </td>

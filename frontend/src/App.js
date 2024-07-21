@@ -70,7 +70,7 @@ const App = () => {
               {authenticated ? (
                 <>
                   <Route path="/" element={<ExecutionTable reports={reports} />} />
-                  <Route path="/execution/:name" element={<ExecutionDetail reports={reports} />} />
+                  <Route path="/execution/:reportIndex/:name" element={<ExecutionDetail reports={reports} />} />
                   <Route path="/testcase/:featureIndex/:testCaseIndex" element={<TestCaseDetail reports={reports} />} />
                   <Route path="/model-training" element={<ModelTrainingComponent />} />
 				  <Route path="/result-analysis" element={<ResultAnalysis />} target="_blank" rel="noopener noreferrer" />

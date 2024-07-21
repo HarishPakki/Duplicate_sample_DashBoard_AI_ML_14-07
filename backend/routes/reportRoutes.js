@@ -103,19 +103,65 @@ const processFeature = (feature) => {
 };
 
 // Endpoint to get all reports and print stats
+// router.get('/', (req, res) => {
+//     const reportsDir = path.join(__dirname, '../../common/cucumber-reports');
+//     try {
+//         computeStats(reportsDir);
+//         const files = fs.readdirSync(reportsDir);
+//         const reports = files.map(file => {
+//             const filePath = path.join(reportsDir, file);
+//             const report = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+//             return {
+//                 name: file,
+//                 data: report
+//             };
+//         });
+//         res.json(reports);
+//     } catch (err) {
+//         console.error('Error processing reports:', err.message);
+//         res.status(500).json({ error: err.message });
+//     }
+// });
+
+const findReportFiles = (dir) => {
+    let results = [];
+    
+    const list = fs.readdirSync(dir);
+    list.forEach((file) => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      
+      if (stat && stat.isDirectory()) {
+        results = results.concat(findReportFiles(filePath));
+      } else if (file === 'report.json') {
+        results.push(filePath);
+      }
+    });
+    
+    return results;
+  };
+
+  const readReportFiles = (filePaths) => {
+    return filePaths.map((filePath) => {
+      const data = fs.readFileSync(filePath, 'utf8');
+      let arr = filePath.split("\\");
+      let executionFolderName=arr[arr.length-2];
+      const testCase = JSON.parse(data);
+
+      return {
+        name:executionFolderName,
+        data:JSON.parse(data)
+      };
+    });
+  };
+
+  
 router.get('/', (req, res) => {
-    const reportsDir = path.join(__dirname, '../../common/cucumber-reports');
+    const reportsDir = path.join(__dirname, '../../common/cucumber-reports/');
     try {
-        computeStats(reportsDir);
-        const files = fs.readdirSync(reportsDir);
-        const reports = files.map(file => {
-            const filePath = path.join(reportsDir, file);
-            const report = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            return {
-                name: file,
-                data: report
-            };
-        });
+        const reportFiles = findReportFiles(reportsDir);
+        const reports = readReportFiles(reportFiles);
+
         res.json(reports);
     } catch (err) {
         console.error('Error processing reports:', err.message);
@@ -138,6 +184,23 @@ router.get('/:name', (req, res) => {
     } catch (err) {
         console.error('Error fetching report:', err.message);
         res.status(500).json({ error: err.message });
+    }
+});
+
+const toBase64 = (filePath) => {
+    const file = fs.readFileSync(filePath);
+    return `data:image/png;base64,${file.toString('base64')}`;
+};
+
+router.get('/image/getCode/:foldername/:filename', (req, res) => {
+    console.log("IMAGE API",req.params.foldername,req.params.filename)
+    const imagePath = path.join(__dirname, `../../common/cucumber-reports/${req.params.foldername}/screenshots`, req.params.filename);
+  
+    if (fs.existsSync(imagePath)) {
+      const base64Image = toBase64(imagePath);
+      res.json({ base64Image });
+    } else {
+      res.status(404).send('Image not found');
     }
 });
 

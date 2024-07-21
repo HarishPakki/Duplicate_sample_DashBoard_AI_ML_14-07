@@ -271,7 +271,7 @@ const ExecutionTable = ({ reports }) => {
                                 />
                             </td>
                             <td>{indexOfFirstReport + index + 1}</td>
-                            <td><Link to={`/execution/${report.name}`}>{report.name}</Link></td>
+                            <td><Link to={`/execution/${index}/${report.name}`}>{report.name}</Link></td>
                             <td>{report.team || 'N/A'}</td>
                             <td>{report.timestamp ? report.timestamp.split('T')[0] : 'N/A'}</td>
                             <td>{getStatus(report.data[0]?.elements)}</td>
