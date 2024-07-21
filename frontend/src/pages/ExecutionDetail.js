@@ -56,6 +56,10 @@ const ExecutionDetail = ({ reports }) => {
     }],
   };
 
+  const downloadLogs=()=>{
+    window.open(`http://localhost:5000/api/reports/logs/downloadFile/${report.name}`, '_blank');
+  };
+
   return (
     <div className="execution-detail">
       <h2>Execution Detail</h2>
@@ -98,6 +102,11 @@ const ExecutionDetail = ({ reports }) => {
           <h3>Next Predicted Value: {prediction}</h3>
         </div>
       )}
+      <div>
+        <button onClick={downloadLogs}>
+          Download Logs
+        </button>
+      </div>
       <div className="testcase-section">
         <h3>Test Cases</h3>
         <div className="table-container">

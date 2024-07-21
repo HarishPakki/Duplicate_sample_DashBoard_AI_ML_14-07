@@ -204,6 +204,17 @@ router.get('/image/getCode/:foldername/:filename', (req, res) => {
     }
 });
 
+router.get('/logs/downloadFile/:foldername', (req, res) => {
+    console.log('logs',req.params.foldername)
+    const filePath = path.join(__dirname, `../../common/cucumber-reports/${req.params.foldername}`, 'logs.txt');
+  
+    res.download(filePath, 'logs.txt', (err) => {
+      if (err) {
+        res.status(500).send('Error downloading file',err);
+      }
+    });
+  });
+
 // New endpoint to analyze selected reports
 router.post('/analyze', (req, res) => {
     const selectedExecutions = req.body.executions;
