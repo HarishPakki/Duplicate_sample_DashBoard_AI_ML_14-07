@@ -102,27 +102,6 @@ const processFeature = (feature) => {
     };
 };
 
-// Endpoint to get all reports and print stats
-// router.get('/', (req, res) => {
-//     const reportsDir = path.join(__dirname, '../../common/cucumber-reports');
-//     try {
-//         computeStats(reportsDir);
-//         const files = fs.readdirSync(reportsDir);
-//         const reports = files.map(file => {
-//             const filePath = path.join(reportsDir, file);
-//             const report = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-//             return {
-//                 name: file,
-//                 data: report
-//             };
-//         });
-//         res.json(reports);
-//     } catch (err) {
-//         console.error('Error processing reports:', err.message);
-//         res.status(500).json({ error: err.message });
-//     }
-// });
-
 const findReportFiles = (dir) => {
     let results = [];
     
@@ -141,21 +120,20 @@ const findReportFiles = (dir) => {
     return results;
   };
 
-  const readReportFiles = (filePaths) => {
+const readReportFiles = (filePaths) => {
     return filePaths.map((filePath) => {
       const data = fs.readFileSync(filePath, 'utf8');
       let arr = filePath.split("\\");
-      let executionFolderName=arr[arr.length-2];
+      let executionFolderName = arr[arr.length - 2];
       const testCase = JSON.parse(data);
 
       return {
-        name:executionFolderName,
-        data:JSON.parse(data)
+        name: executionFolderName,
+        data: JSON.parse(data)
       };
     });
-  };
+};
 
-  
 router.get('/', (req, res) => {
     const reportsDir = path.join(__dirname, '../../common/cucumber-reports/');
     try {
@@ -193,7 +171,7 @@ const toBase64 = (filePath) => {
 };
 
 router.get('/image/getCode/:foldername/:filename', (req, res) => {
-    console.log("IMAGE API",req.params.foldername,req.params.filename)
+    console.log("IMAGE API", req.params.foldername, req.params.filename)
     const imagePath = path.join(__dirname, `../../common/cucumber-reports/${req.params.foldername}/screenshots`, req.params.filename);
   
     if (fs.existsSync(imagePath)) {
@@ -205,15 +183,15 @@ router.get('/image/getCode/:foldername/:filename', (req, res) => {
 });
 
 router.get('/logs/downloadFile/:foldername', (req, res) => {
-    console.log('logs',req.params.foldername)
+    console.log('logs', req.params.foldername)
     const filePath = path.join(__dirname, `../../common/cucumber-reports/${req.params.foldername}`, 'logs.txt');
   
     res.download(filePath, 'logs.txt', (err) => {
       if (err) {
-        res.status(500).send('Error downloading file',err);
+        res.status(500).send('Error downloading file', err);
       }
     });
-  });
+});
 
 // New endpoint to analyze selected reports
 router.post('/analyze', (req, res) => {
@@ -221,8 +199,14 @@ router.post('/analyze', (req, res) => {
     if (!selectedExecutions || !Array.isArray(selectedExecutions)) {
         return res.status(400).json({ error: 'Invalid input data' });
     }
-    const results = analyzeResults(selectedExecutions);
-    res.json(results);
+    
+    try {
+        const results = analyzeResults(selectedExecutions);
+        res.json(results);
+    } catch (error) {
+        console.error('Error analyzing results:', error);
+        res.status(500).send(`Error analyzing results: ${error.message}`);
+    }
 });
 
 module.exports = router;

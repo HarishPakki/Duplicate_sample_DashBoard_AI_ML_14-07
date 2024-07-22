@@ -1,48 +1,32 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import './ResultAnalysis.css';
+import { analyzeResults } from '../utils/frontendUtils';
+import './ResultAnalysis.css'; // Ensure this CSS file exists for styling
 
 const ResultAnalysis = () => {
     const location = useLocation();
-    const { feedbackData } = location.state || { feedbackData: [] };
+    const { feedbackData } = location.state || {};
+
+    if (!feedbackData || feedbackData.length === 0) {
+        return <div>No feedback data available for analysis</div>;
+    }
+
+    const analysisResults = analyzeResults(feedbackData);
 
     return (
         <div className="result-analysis-container">
             <h2>Result Analysis</h2>
-            {feedbackData.length === 0 ? (
-                <p>No data available for analysis.</p>
-            ) : (
-                <table className="result-analysis-table">
-                    <thead>
-                        <tr>
-                            <th>Execution Name</th>
-                            <th>Total Test Cases</th>
-                            <th>Passed</th>
-                            <th>Failed</th>
-                            <th>Common Error</th>
-                            <th>Common XPath Failure</th>
-                            <th>Common Step Failure</th>
-                            <th>Common Exception</th>
-                            <th>Feedback</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {feedbackData.map((execution, index) => (
-                            <tr key={index}>
-                                <td>{execution.executionName}</td>
-                                <td>{execution.totalTestCases}</td>
-                                <td>{execution.passed}</td>
-                                <td>{execution.failed}</td>
-                                <td>{execution.commonError}</td>
-                                <td>{execution.commonXPathFailure}</td>
-                                <td>{execution.commonStepFailure}</td>
-                                <td>{execution.commonException}</td>
-                                <td>{execution.feedback}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+            {analysisResults.map((result, index) => (
+                <div key={index} className="analysis-result">
+                    <h3>Execution: {result.executionName}</h3>
+                    <p>Total Test Cases: {result.totalTestCases}</p>
+                    <p>Passed: {result.passed}</p>
+                    <p>Failed: {result.failed}</p>
+                    <p>Most Frequent Error: {result.commonError}</p>
+                    <p>Most Frequent Error Step: {result.commonXPathFailure}</p>
+                    {/* <p>Feedback: {result.feedback}</p> Comment out for now */}
+                </div>
+            ))}
         </div>
     );
 };

@@ -1,0 +1,166 @@
+/* ExecutionDetail.css */
+
+.execution-detail {
+    padding: 20px;
+  }
+  
+  .buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: #009879;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.3s;
+  }
+  
+  .btn i {
+    margin-right: 10px;
+  }
+  
+  .btn.download-btn {
+    background-color: #4CAF50;
+  }
+  
+  .btn.error-analysis-btn {
+    background-color: #FF5733;
+  }
+  
+  .btn.error-btn {
+    background-color: #FF5733;
+  }
+  
+  .btn.screenshot-btn {
+    background-color: #FFA500;
+  }
+  
+  .btn:hover {
+    background-color: #006f5b;
+  }
+  
+  .error-popup-overlay, .error-analysis-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .error-popup, .error-analysis-popup {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transform: translateY(-30px);
+    animation: slideIn 0.3s ease-out forwards;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(-50px);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  .close-button {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  .close-button:hover {
+    color: #333;
+  }
+  
+  .error-popup h2, .error-analysis-popup h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .error-popup h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  .error-popup p {
+    white-space: pre-wrap;
+  }
+  
+  .table-container {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+    text-align: left;
+  }
+  
+  .styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+  }
+  
+  .styled-table th, .styled-table td {
+    padding: 12px 15px;
+  }
+  
+  .styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+  }
+  
+  .styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .export-dropdown {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .export-dropdown select {
+    padding: 5px;
+    margin-right: 10px;
+  }
+  

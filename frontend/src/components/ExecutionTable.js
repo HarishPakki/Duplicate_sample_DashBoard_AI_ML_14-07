@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Pagination from './Pagination';
 import Filters from './Filters';
 import './ExecutionTable.css';
-import { FaFilter, FaSort  } from 'react-icons/fa';
+import { FaFilter, FaSort } from 'react-icons/fa';
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -62,7 +62,7 @@ const ExecutionTable = ({ reports }) => {
                 report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (report.team && report.team.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (report.timestamp && report.timestamp.split('T')[0].includes(searchTerm)) ||
-                (getStatus(report.data[0]?.elements).toLowerCase().includes(searchTerm.toLowerCase()))
+                (getStatus(report.elements).toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
 
@@ -110,7 +110,7 @@ const ExecutionTable = ({ reports }) => {
                 report.name,
                 report.team || 'N/A',
                 report.timestamp ? report.timestamp.split('T')[0] : 'N/A',
-                getStatus(report.data[0]?.elements)
+                getStatus(report.elements)
             ])
         });
         doc.save('Reports.pdf');
@@ -141,6 +141,8 @@ const ExecutionTable = ({ reports }) => {
 
     const generateFeedback = async () => {
         try {
+            console.log('Selected Reports:', selectedReports);
+
             const response = await fetch('http://localhost:5000/api/reports/analyze', {
                 method: 'POST',
                 headers: {
@@ -148,10 +150,17 @@ const ExecutionTable = ({ reports }) => {
                 },
                 body: JSON.stringify({ executions: selectedReports }),
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server Error: ${response.status} ${errorText}`);
+            }
+
             const feedbackData = await response.json();
             navigate('/result-analysis', { state: { feedbackData } });
         } catch (error) {
             console.error('Error generating feedback:', error);
+            alert(`Error generating feedback: ${error.message}`);
         }
     };
 
@@ -274,7 +283,7 @@ const ExecutionTable = ({ reports }) => {
                             <td><Link to={`/execution/${index}/${report.name}`}>{report.name}</Link></td>
                             <td>{report.team || 'N/A'}</td>
                             <td>{report.timestamp ? report.timestamp.split('T')[0] : 'N/A'}</td>
-                            <td>{getStatus(report.data[0]?.elements)}</td>
+                            <td>{getStatus(report.elements)}</td>
                         </tr>
                     ))}
                 </tbody>

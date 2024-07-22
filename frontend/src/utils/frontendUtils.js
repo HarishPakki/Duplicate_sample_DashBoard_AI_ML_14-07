@@ -1,5 +1,5 @@
 const synaptic = require('synaptic');
-const nlp = require('compromise');
+// const nlp = require('compromise'); // Comment out this line for now
 
 // Initialize the synaptic network
 const { Layer, Network } = synaptic;
@@ -32,10 +32,10 @@ const trainNetwork = (trainingData) => {
 const prepareTrainingData = (executions) => {
     const trainingData = [];
     executions.forEach(execution => {
-        const commonError = findCommonError(execution.data || []);
-        const commonXPathFailure = findCommonXPathFailure(execution.data || []);
+        const commonError = findCommonError(execution.elements || []);
+        const commonXPathFailure = findCommonXPathFailure(execution.elements || []);
         const input = [commonError.length / 100, commonXPathFailure.length / 100];
-        const output = [(execution.data.filter(test => test.status === 'failed').length / execution.data.length)];
+        const output = [(execution.elements?.filter(test => test.steps?.some(step => step.result?.status === 'failed')).length || 0) / (execution.elements?.length || 1)];
         trainingData.push({ input, output });
     });
     return trainingData;
@@ -44,16 +44,16 @@ const prepareTrainingData = (executions) => {
 const analyzeResults = (executions) => {
     // Prepare and train the network with the dynamic execution data
     const trainingData = prepareTrainingData(executions);
-    trainNetwork(trainingData);
+    // trainNetwork(trainingData); // Comment out for now
 
     const analysisResults = executions.map(execution => {
-        const totalTestCases = execution.data.length;
-        const passed = execution.data.filter(test => test.status === 'passed').length;
-        const failed = execution.data.filter(test => test.status === 'failed').length;
+        const totalTestCases = execution.elements?.length || 0;
+        const passed = execution.elements?.filter(test => test.steps?.every(step => step.result?.status === 'passed')).length || 0;
+        const failed = execution.elements?.filter(test => test.steps?.some(step => step.result?.status === 'failed')).length || 0;
 
-        const commonError = findCommonError(execution.data || []);
-        const commonXPathFailure = findCommonXPathFailure(execution.data || []);
-        const feedback = generateFeedback(commonError, commonXPathFailure);
+        const commonError = findCommonError(execution.elements || []);
+        const commonXPathFailure = findCommonXPathFailure(execution.elements || []);
+        // const feedback = generateFeedback(commonError, commonXPathFailure); // Comment out for now
 
         return {
             executionName: execution.name,
@@ -62,7 +62,7 @@ const analyzeResults = (executions) => {
             failed,
             commonError,
             commonXPathFailure,
-            feedback
+            // feedback // Comment out for now
         };
     });
 
@@ -74,18 +74,18 @@ const analyzeResults = (executions) => {
         console.log(`Failed: ${result.failed}`);
         console.log(`Most Frequent Error: ${result.commonError}`);
         console.log(`Most Frequent Error Step: ${result.commonXPathFailure}`);
-        console.log(`Feedback: ${result.feedback}`);
+        // console.log(`Feedback: ${result.feedback}`); // Comment out for now
     });
 
     return analysisResults;
 };
 
-const findCommonError = (data) => {
+const findCommonError = (elements) => {
     const errorCounts = {};
-    data.forEach(test => {
+    elements.forEach(test => {
         if (test.steps) {
             test.steps.forEach(step => {
-                if (step.result.status === 'failed') {
+                if (step.result?.status === 'failed') {
                     const errorMessage = step.result.error_message;
                     if (errorMessage) {
                         errorCounts[errorMessage] = (errorCounts[errorMessage] || 0) + 1;
@@ -99,12 +99,12 @@ const findCommonError = (data) => {
     return sortedErrors.length > 0 ? sortedErrors[0][0] : 'No common error';
 };
 
-const findCommonXPathFailure = (data) => {
+const findCommonXPathFailure = (elements) => {
     const xpathCounts = {};
-    data.forEach(test => {
+    elements.forEach(test => {
         if (test.steps) {
             test.steps.forEach(step => {
-                if (step.result.status === 'failed' && step.result.error_message && step.result.error_message.includes('XPath')) {
+                if (step.result?.status === 'failed' && step.result.error_message?.includes('XPath')) {
                     const xpathError = step.result.error_message;
                     if (xpathError) {
                         xpathCounts[xpathError] = (xpathCounts[xpathError] || 0) + 1;
@@ -118,28 +118,28 @@ const findCommonXPathFailure = (data) => {
     return sortedXPaths.length > 0 ? sortedXPaths[0][0] : 'No common XPath failure';
 };
 
-const generateFeedback = (commonError, commonXPathFailure) => {
-    const input = [commonError.length / 100, commonXPathFailure.length / 100];
-    const output = network.activate(input);
-    const feedbackValue = output[0];
+// const generateFeedback = (commonError, commonXPathFailure) => {
+//     const input = [commonError.length / 100, commonXPathFailure.length / 100];
+//     const output = network.activate(input);
+//     const feedbackValue = output[0];
 
-    let feedback = '';
+//     let feedback = '';
 
-    if (feedbackValue > 0.5) {
-        feedback += 'There is a high likelihood of encountering errors related to common issues detected in the executions. ';
-    } else {
-        feedback += 'Errors related to common issues are unlikely to occur. ';
-    }
+//     if (feedbackValue > 0.5) {
+//         feedback += 'There is a high likelihood of encountering errors related to common issues detected in the executions. ';
+//     } else {
+//         feedback += 'Errors related to common issues are unlikely to occur. ';
+//     }
 
-    if (feedbackValue > 0.5) {
-        feedback += 'There is a high likelihood of encountering XPath failures. ';
-    } else {
-        feedback += 'XPath failures are unlikely to occur. ';
-    }
+//     if (feedbackValue > 0.5) {
+//         feedback += 'There is a high likelihood of encountering XPath failures. ';
+//     } else {
+//         feedback += 'XPath failures are unlikely to occur. ';
+//     }
 
-    feedback = nlp(feedback).out('text');
+//     feedback = nlp(feedback).out('text');
 
-    return feedback;
-};
+//     return feedback;
+// };
 
 module.exports = { analyzeResults };
