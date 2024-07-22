@@ -61,12 +61,10 @@ const ExecutionDetail = ({ reports }) => {
     }],
   };
 
-const allTestCases=[];
-report.data.forEach(element=>{
-allTestCases.push(...element.elements)
-
-
-});
+  const allTestCases=[];
+  report.data.forEach(element=>{
+    allTestCases.push(...element.elements);
+  });
 
   const downloadLogs = () => {
     window.open(`http://localhost:5000/api/reports/logs/downloadFile/${report.name}`, '_blank');
@@ -225,7 +223,7 @@ allTestCases.push(...element.elements)
               {(allTestCases || []).map((testCase, testCaseIndex) => (
                 <tr key={`${testCaseIndex}`}>
                   <td>
-                    <Link to={`/testcase/${reportIndex}/${testCaseIndex}`}state={{steps:testCase.steps,name:report.name}}>
+                    <Link to={`/testcase/${reportIndex}/${testCaseIndex}`} state={{steps: testCase.steps, name: report.name}}>
                       {testCase.name}
                     </Link>
                   </td>

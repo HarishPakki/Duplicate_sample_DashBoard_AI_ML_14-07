@@ -1,15 +1,18 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import './Header.css';
 
 const Header = () => {
-    const location = useLocation();
-    const isExecutionDetailPage = location.pathname.startsWith('/execution');
-
-    return (
-        <header className="App-header execution-header">
-            <h1>{isExecutionDetailPage ? 'Execution Detail' : 'Automation Execution Dashboard'}</h1>
-        </header>
-    );
+  return (
+    <header>
+      <nav>
+        <ul>
+          <li><NavLink to="/" activeClassName="active">Execution Reports</NavLink></li>
+          <li><NavLink to="/results-overview" activeClassName="active">Results Overview</NavLink></li>
+        </ul>
+      </nav>
+    </header>
+  );
 };
 
 export default Header;

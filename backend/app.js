@@ -1,15 +1,25 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const app = express();
-const port = 5000;
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Header from './Header';
+import ExecutionTable from './ExecutionTable';
+import ExecutionDetail from './ExecutionDetail';
+import ResultAnalysis from './ResultAnalysis';
+import ResultsOverview from './ResultsOverview';
 
-app.use(bodyParser.json());
-app.use(cors());
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <Header />
+        <Routes>
+          <Route path="/" element={<ExecutionTable />} />
+          <Route path="/execution/:reportIndex/:name" element={<ExecutionDetail />} />
+          <Route path="/result-analysis" element={<ResultAnalysis />} />
+          <Route path="/results-overview" element={<ResultsOverview />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
 
-const reportRoutes = require('./routes/reportRoutes');
-app.use('/api/reports', reportRoutes);
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+export default App;

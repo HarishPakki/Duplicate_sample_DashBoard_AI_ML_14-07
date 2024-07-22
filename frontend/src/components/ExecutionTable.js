@@ -1,13 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Pagination from './Pagination';
-import Filters from './Filters';
-import './ExecutionTable.css';
+import Pagination from '../components/Pagination';
+import Filters from '../components/Filters';
+import '../components/ExecutionTable.css';
 import { FaFilter, FaSort } from 'react-icons/fa';
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { Pie, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js';
+
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+);
 
 const ExecutionTable = ({ reports }) => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,11 +36,11 @@ const ExecutionTable = ({ reports }) => {
     const [filterPopupVisible, setFilterPopupVisible] = useState(false);
     const [filterColumn, setFilterColumn] = useState("");
     const [exportType, setExportType] = useState("CSV");
+    const [selectedProject, setSelectedProject] = useState("");
+    const [projects, setProjects] = useState([]);
+    const [activeTab, setActiveTab] = useState("reports");
 
     const [filters, setFilters] = useState({
-        team: '',
-        type: '',
-        user: '',
         startDate: '',
         endDate: ''
     });
@@ -31,22 +50,20 @@ const ExecutionTable = ({ reports }) => {
     useEffect(() => {
         if (Array.isArray(reports)) {
             setFilteredReports(reports);
+            // Extract project names from execution names
+            const projectNames = [...new Set(reports.map(report => report.name.split('_').slice(0, -3).join('_')))];
+            setProjects(projectNames);
         }
     }, [reports]);
 
     const applyFilters = () => {
         let updatedReports = Array.isArray(reports) ? reports : [];
 
-        if (filters.team) {
-            updatedReports = updatedReports.filter(report => report.team === filters.team);
-        }
-
-        if (filters.type) {
-            updatedReports = updatedReports.filter(report => report.type === filters.type);
-        }
-
-        if (filters.user) {
-            updatedReports = updatedReports.filter(report => report.user === filters.user);
+        if (selectedProject) {
+            updatedReports = updatedReports.filter(report => {
+                const projectName = report.name.split('_').slice(0, -3).join('_');
+                return projectName === selectedProject;
+            });
         }
 
         if (filters.startDate) {
@@ -60,9 +77,8 @@ const ExecutionTable = ({ reports }) => {
         if (searchTerm) {
             updatedReports = updatedReports.filter(report =>
                 report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (report.team && report.team.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (report.timestamp && report.timestamp.split('T')[0].includes(searchTerm)) ||
-                (getStatus(report.elements).toLowerCase().includes(searchTerm.toLowerCase()))
+                (getStatus(report.data[0]?.elements).toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
 
@@ -71,7 +87,7 @@ const ExecutionTable = ({ reports }) => {
 
     useEffect(() => {
         applyFilters();
-    }, [filters, searchTerm]);
+    }, [filters, searchTerm, selectedProject]);
 
     const indexOfLastReport = currentPage * 10; // Use a constant value for reportsPerPage
     const indexOfFirstReport = indexOfLastReport - 10; // Use a constant value for reportsPerPage
@@ -104,13 +120,12 @@ const ExecutionTable = ({ reports }) => {
     const exportToPDF = () => {
         const doc = new jsPDF();
         doc.autoTable({
-            head: [['Serial Number', 'Execution Name', 'Team', 'Executed Date', 'Status']],
+            head: [['Serial Number', 'Execution Name', 'Executed Date', 'Status']],
             body: filteredReports.map((report, index) => [
                 index + 1,
                 report.name,
-                report.team || 'N/A',
-                report.timestamp ? report.timestamp.split('T')[0] : 'N/A',
-                getStatus(report.elements)
+                report.timestamp ? new Date(report.timestamp).toLocaleString() : 'N/A',
+                getStatus(report.data[0]?.elements)
             ])
         });
         doc.save('Reports.pdf');
@@ -141,8 +156,6 @@ const ExecutionTable = ({ reports }) => {
 
     const generateFeedback = async () => {
         try {
-            console.log('Selected Reports:', selectedReports);
-
             const response = await fetch('http://localhost:5000/api/reports/analyze', {
                 method: 'POST',
                 headers: {
@@ -150,150 +163,206 @@ const ExecutionTable = ({ reports }) => {
                 },
                 body: JSON.stringify({ executions: selectedReports }),
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server Error: ${response.status} ${errorText}`);
-            }
-
             const feedbackData = await response.json();
             navigate('/result-analysis', { state: { feedbackData } });
         } catch (error) {
             console.error('Error generating feedback:', error);
-            alert(`Error generating feedback: ${error.message}`);
         }
+    };
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+    };
+
+    const projectData = projects.map(project => {
+        const projectReports = reports.filter(report => report.name.startsWith(project));
+        const totalPassed = projectReports.reduce((acc, report) => acc + (report.data[0].elements || []).filter(e => e.steps.every(s => s.result.status === 'passed')).length, 0);
+        const totalFailed = projectReports.reduce((acc, report) => acc + (report.data[0].elements || []).filter(e => e.steps.some(s => s.result.status === 'failed')).length, 0);
+        return { project, totalPassed, totalFailed };
+    });
+
+    const pieData = {
+        labels: projects,
+        datasets: [{
+            label: 'Passed',
+            data: projectData.map(d => d.totalPassed),
+            backgroundColor: '#4CAF50'
+        }, {
+            label: 'Failed',
+            data: projectData.map(d => d.totalFailed),
+            backgroundColor: '#FF0000'
+        }]
+    };
+
+    const barData = {
+        labels: projects,
+        datasets: [{
+            label: 'Passed',
+            data: projectData.map(d => d.totalPassed),
+            backgroundColor: '#4CAF50'
+        }, {
+            label: 'Failed',
+            data: projectData.map(d => d.totalFailed),
+            backgroundColor: '#FF0000'
+        }]
     };
 
     return (
         <div className="execution-table-container">
-            <h2>Execution Reports</h2>
-            <Filters filters={filters} onChange={handleFiltersChange} />
-            <div className="search-and-export">
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <div className="export-dropdown">
-                    <select value={exportType} onChange={(e) => setExportType(e.target.value)}>
-                        <option value="CSV">CSV</option>
-                        <option value="Excel">Excel</option>
-                        <option value="PDF">PDF</option>
-                    </select>
-                    <button className="btn download-btn" onClick={handleDownload}>Download</button>
-                    <CSVLink
-                        data={filteredReports}
-                        filename={"Reports.csv"}
-                        className="hidden"
-                        id="csv-export"
-                        target="_blank"
-                    />
-                </div>
+            <h2>Report Analysis</h2>
+            <div className="tab-buttons">
+                <button className={`tab-button ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => handleTabChange('reports')}>Execution Reports</button>
+                <button className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => handleTabChange('overview')}>Results Overview</button>
             </div>
-            <button 
-                className="btn feedback-btn" 
-                onClick={generateFeedback} 
-                disabled={selectedReports.length === 0}
-            >
-                Generate Feedback
-            </button>
-            <table className="styled-table">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th onClick={() => toggleFilterPopup('serialNumber')}>
-                            Serial Number <FaSort />
-                            {filterColumn === 'serialNumber' && filterPopupVisible && (
-                                <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search Serial Number"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                            )}
-                        </th>
-                        <th onClick={() => toggleFilterPopup('name')}>
-                            Execution Name <FaSort /> <FaFilter />
-                            {filterColumn === 'name' && filterPopupVisible && (
-                                <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search Execution Name"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                            )}
-                        </th>
-                        <th onClick={() => toggleFilterPopup('team')}>
-                            Team <FaSort /> <FaFilter />
-                            {filterColumn === 'team' && filterPopupVisible && (
-                                <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search Team"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                            )}
-                        </th>
-                        <th onClick={() => toggleFilterPopup('executedDate')}>
-                            Executed Date <FaSort /> <FaFilter />
-                            {filterColumn === 'executedDate' && filterPopupVisible && (
-                                <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search Executed Date"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                            )}
-                        </th>
-                        <th onClick={() => toggleFilterPopup('status')}>
-                            Status <FaSort /> <FaFilter />
-                            {filterColumn === 'status' && filterPopupVisible && (
-                                <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search Status"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                            )}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentReports.map((report, index) => (
-                        <tr key={index}>
-                            <td>
-                                <input
-                                    type="checkbox"
-                                    checked={selectedReports.includes(report)}
-                                    onChange={() => handleReportSelection(report)}
-                                />
-                            </td>
-                            <td>{indexOfFirstReport + index + 1}</td>
-                            <td><Link to={`/execution/${index}/${report.name}`}>{report.name}</Link></td>
-                            <td>{report.team || 'N/A'}</td>
-                            <td>{report.timestamp ? report.timestamp.split('T')[0] : 'N/A'}</td>
-                            <td>{getStatus(report.elements)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            <Pagination
-                reportsPerPage={10} // Use a constant value for reportsPerPage
-                totalReports={filteredReports.length}
-                paginate={handlePagination}
-                currentPage={currentPage}
-            />
+            {activeTab === 'reports' && (
+                <>
+                    <div className="filters-container">
+                        <select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)}>
+                            <option value="">Select Project</option>
+                            {projects.map((project, index) => (
+                                <option key={index} value={project}>{project}</option>
+                            ))}
+                        </select>
+                        <input
+                            type="date"
+                            name="startDate"
+                            placeholder="Start Date"
+                            value={filters.startDate}
+                            onChange={(e) => handleFiltersChange({ ...filters, startDate: e.target.value })}
+                        />
+                        <input
+                            type="date"
+                            name="endDate"
+                            placeholder="End Date"
+                            value={filters.endDate}
+                            onChange={(e) => handleFiltersChange({ ...filters, endDate: e.target.value })}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <div className="export-dropdown">
+                            <select value={exportType} onChange={(e) => setExportType(e.target.value)}>
+                                <option value="CSV">CSV</option>
+                                <option value="Excel">Excel</option>
+                                <option value="PDF">PDF</option>
+                            </select>
+                            <button className="btn download-btn" onClick={handleDownload}>Download</button>
+                            <CSVLink
+                                data={filteredReports}
+                                filename={"Reports.csv"}
+                                className="hidden"
+                                id="csv-export"
+                                target="_blank"
+                            />
+                        </div>
+                    </div>
+                    <button 
+                        className="btn feedback-btn" 
+                        onClick={generateFeedback} 
+                        disabled={selectedReports.length === 0}
+                    >
+                        Generate Feedback
+                    </button>
+                    <table className="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Serial Number</th>
+                                <th>Execution Name</th>
+                                <th>Executed Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentReports.map((report, index) => (
+                                <tr key={index}>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedReports.includes(report)}
+                                            onChange={() => handleReportSelection(report)}
+                                        />
+                                    </td>
+                                    <td>{indexOfFirstReport + index + 1}</td>
+                                    <td><Link to={`/execution/${index}/${report.name}`}>{report.name}</Link></td>
+                                    <td>{report.timestamp ? new Date(report.timestamp).toLocaleString() : 'N/A'}</td>
+                                    <td>{getStatus(report.data[0]?.elements)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <Pagination
+                        reportsPerPage={10} // Use a constant value for reportsPerPage
+                        totalReports={filteredReports.length}
+                        paginate={handlePagination}
+                        currentPage={currentPage}
+                    />
+                </>
+            )}
+            {activeTab === 'overview' && (
+                <div className="results-overview">
+                    <h3>Results Overview</h3>
+                    <div className="chart-container">
+                        <Pie 
+                            data={pieData} 
+                            options={{
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                const project = context.label;
+                                                const passed = context.dataset.data[context.dataIndex];
+                                                const total = projectData.find(d => d.project === project).totalPassed + projectData.find(d => d.project === project).totalFailed;
+                                                const percentage = ((passed / total) * 100).toFixed(2);
+                                                return `${project}: ${context.dataset.label} - ${passed} (${percentage}%)`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                    <div className="chart-container">
+                        <Bar 
+                            data={barData} 
+                            options={{
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Projects'
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Test Cases'
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return `${context.dataset.label}: ${context.raw}`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

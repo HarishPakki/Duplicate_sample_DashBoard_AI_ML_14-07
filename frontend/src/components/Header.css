@@ -1,0 +1,29 @@
+/* Header.css */
+
+header {
+    background: #333;
+    padding: 10px 20px;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  nav ul li {
+    display: inline;
+  }
+  
+  nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    transition: background 0.3s ease;
+  }
+  
+  nav ul li a.active, nav ul li a:hover {
+    background: #555;
+    border-radius: 5px;
+  }
+  

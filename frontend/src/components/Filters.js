@@ -1,40 +1,27 @@
-// src/components/Filters.js
 import React from 'react';
 import './Filters.css';
 
 const Filters = ({ filters, onChange }) => {
-    const handleInputChange = (e) => {
+    const handleFilterChange = (e) => {
         const { name, value } = e.target;
         onChange({ ...filters, [name]: value });
     };
 
     return (
-        <div className="filters-container">
-            <select name="team" value={filters.team} onChange={handleInputChange}>
-                <option value="">All Teams</option>
-                {/* Add team options here */}
-            </select>
-            <select name="type" value={filters.type} onChange={handleInputChange}>
-                <option value="">All Types</option>
-                {/* Add type options here */}
-            </select>
-            <select name="user" value={filters.user} onChange={handleInputChange}>
-                <option value="">All Users</option>
-                {/* Add user options here */}
-            </select>
+        <div className="filters">
             <input
                 type="date"
                 name="startDate"
+                placeholder="Start Date"
                 value={filters.startDate}
-                onChange={handleInputChange}
-                disabled
+                onChange={handleFilterChange}
             />
             <input
                 type="date"
                 name="endDate"
+                placeholder="End Date"
                 value={filters.endDate}
-                onChange={handleInputChange}
-                disabled
+                onChange={handleFilterChange}
             />
         </div>
     );
